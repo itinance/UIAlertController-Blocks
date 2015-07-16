@@ -7,6 +7,7 @@
 //  The MIT License (MIT)
 //
 //  Copyright (c) 2014 Ryan Maxwell
+//  "Only-Once" extension 2015 by Hagen Hübel
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -36,6 +37,7 @@ typedef void (^UIAlertControllerCompletionBlock) (UIAlertController * __nonnull 
 + (nonnull instancetype)showInViewController:(nonnull UIViewController *)viewController
                                    withTitle:(nullable NSString *)title
                                      message:(nullable NSString *)message
+                                    onlyOnce:(bool) onlyOnce
                               preferredStyle:(UIAlertControllerStyle)preferredStyle
                            cancelButtonTitle:(nullable NSString *)cancelButtonTitle
                       destructiveButtonTitle:(nullable NSString *)destructiveButtonTitle
@@ -46,6 +48,7 @@ typedef void (^UIAlertControllerCompletionBlock) (UIAlertController * __nonnull 
 + (nonnull instancetype)showAlertInViewController:(nonnull UIViewController *)viewController
                                         withTitle:(nullable NSString *)title
                                           message:(nullable NSString *)message
+                                         onlyOnce:(bool) onlyOnce
                                 cancelButtonTitle:(nullable NSString *)cancelButtonTitle
                            destructiveButtonTitle:(nullable NSString *)destructiveButtonTitle
                                 otherButtonTitles:(nullable NSArray *)otherButtonTitles
@@ -54,6 +57,7 @@ typedef void (^UIAlertControllerCompletionBlock) (UIAlertController * __nonnull 
 + (nonnull instancetype)showActionSheetInViewController:(nonnull UIViewController *)viewController
                                               withTitle:(nullable NSString *)title
                                                 message:(nullable NSString *)message
+                                               onlyOnce:(bool) onlyOnce
                                       cancelButtonTitle:(nullable NSString *)cancelButtonTitle
                                  destructiveButtonTitle:(nullable NSString *)destructiveButtonTitle
                                       otherButtonTitles:(nullable NSArray *)otherButtonTitles

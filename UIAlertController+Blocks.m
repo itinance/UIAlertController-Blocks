@@ -7,6 +7,7 @@
 //  The MIT License (MIT)
 //
 //  Copyright (c) 2014 Ryan Maxwell
+//  "Only-Once" extension 2015 by Hagen Hübel
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -34,9 +35,15 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
 
 @implementation UIAlertController (Blocks)
 
+static bool isAlreadyVisible = false;
+
+
+#define __UIALERT_CLEAR_VISIBLE_FLAG @synchronized([self class]) { isAlreadyVisible = false; }
+
 + (instancetype)showInViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
                              message:(NSString *)message
+                            onlyOnce:(bool) onlyOnce
                       preferredStyle:(UIAlertControllerStyle)preferredStyle
                    cancelButtonTitle:(NSString *)cancelButtonTitle
               destructiveButtonTitle:(NSString *)destructiveButtonTitle
@@ -44,9 +51,24 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
   popoverPresentationControllerBlock:(void(^)(UIPopoverPresentationController *popover))popoverPresentationControllerBlock
                             tapBlock:(UIAlertControllerCompletionBlock)tapBlock
 {
+    
+    @synchronized([self class]) {
+        if(onlyOnce && isAlreadyVisible) {
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSLog(@"UIAlertController already visible. Will avoid to create another instance.");
+            });
+            
+            return nil;
+        }
+    }
+    
+    
     UIAlertController *strongController = [self alertControllerWithTitle:title
                                                                  message:message
                                                           preferredStyle:preferredStyle];
+    
+    isAlreadyVisible = true;
     
     __weak UIAlertController *controller = strongController;
     
@@ -54,6 +76,7 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
         UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:cancelButtonTitle
                                                                style:UIAlertActionStyleCancel
                                                              handler:^(UIAlertAction *action){
+                                                                 __UIALERT_CLEAR_VISIBLE_FLAG;
                                                                  if (tapBlock) {
                                                                      tapBlock(controller, action, UIAlertControllerBlocksCancelButtonIndex);
                                                                  }
@@ -65,6 +88,7 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
         UIAlertAction *destructiveAction = [UIAlertAction actionWithTitle:destructiveButtonTitle
                                                                     style:UIAlertActionStyleDestructive
                                                                   handler:^(UIAlertAction *action){
+                                                                      __UIALERT_CLEAR_VISIBLE_FLAG;
                                                                       if (tapBlock) {
                                                                           tapBlock(controller, action, UIAlertControllerBlocksDestructiveButtonIndex);
                                                                       }
@@ -78,6 +102,7 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
         UIAlertAction *otherAction = [UIAlertAction actionWithTitle:otherButtonTitle
                                                               style:UIAlertActionStyleDefault
                                                             handler:^(UIAlertAction *action){
+                                                                __UIALERT_CLEAR_VISIBLE_FLAG;
                                                                 if (tapBlock) {
                                                                     tapBlock(controller, action, UIAlertControllerBlocksFirstOtherButtonIndex + i);
                                                                 }
@@ -97,6 +122,7 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
 + (instancetype)showAlertInViewController:(UIViewController *)viewController
                                 withTitle:(NSString *)title
                                   message:(NSString *)message
+                                 onlyOnce:(bool) onlyOnce
                         cancelButtonTitle:(NSString *)cancelButtonTitle
                    destructiveButtonTitle:(NSString *)destructiveButtonTitle
                         otherButtonTitles:(NSArray *)otherButtonTitles
@@ -105,6 +131,7 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
     return [self showInViewController:viewController
                             withTitle:title
                               message:message
+                             onlyOnce: onlyOnce
                        preferredStyle:UIAlertControllerStyleAlert
                     cancelButtonTitle:cancelButtonTitle
                destructiveButtonTitle:destructiveButtonTitle
@@ -116,6 +143,7 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
 + (instancetype)showActionSheetInViewController:(UIViewController *)viewController
                                       withTitle:(NSString *)title
                                         message:(NSString *)message
+                                       onlyOnce:(bool) onlyOnce
                               cancelButtonTitle:(NSString *)cancelButtonTitle
                          destructiveButtonTitle:(NSString *)destructiveButtonTitle
                               otherButtonTitles:(NSArray *)otherButtonTitles
@@ -124,6 +152,7 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
     return [self showActionSheetInViewController:viewController
                                        withTitle:title
                                          message:message
+                                        onlyOnce:onlyOnce
                                cancelButtonTitle:cancelButtonTitle
                           destructiveButtonTitle:destructiveButtonTitle
                                otherButtonTitles:otherButtonTitles
@@ -134,6 +163,7 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
 + (instancetype)showActionSheetInViewController:(UIViewController *)viewController
                                       withTitle:(NSString *)title
                                         message:(NSString *)message
+                                       onlyOnce:(bool) onlyOnce
                               cancelButtonTitle:(NSString *)cancelButtonTitle
                          destructiveButtonTitle:(NSString *)destructiveButtonTitle
                               otherButtonTitles:(NSArray *)otherButtonTitles
@@ -143,6 +173,7 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
     return [self showInViewController:viewController
                             withTitle:title
                               message:message
+                             onlyOnce:onlyOnce
                        preferredStyle:UIAlertControllerStyleActionSheet
                     cancelButtonTitle:cancelButtonTitle
                destructiveButtonTitle:destructiveButtonTitle

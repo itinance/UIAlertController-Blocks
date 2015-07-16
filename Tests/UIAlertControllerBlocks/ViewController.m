@@ -39,6 +39,7 @@
     [UIAlertController showAlertInViewController:self
                                        withTitle:@"Test Alert"
                                          message:@"Test Message"
+                                        onlyOnce: YES
                                cancelButtonTitle:@"Cancel"
                           destructiveButtonTitle:@"Delete"
                                otherButtonTitles:@[@"First Other", @"Second Other"]
@@ -50,6 +51,7 @@
     [UIAlertController showActionSheetInViewController:self
                                              withTitle:@"Test Action Sheet"
                                                message:@"Test Message"
+                                              onlyOnce: YES
                                      cancelButtonTitle:@"Cancel"
                                 destructiveButtonTitle:@"Delete"
                                      otherButtonTitles:@[@"First Other", @"Second Other"]
