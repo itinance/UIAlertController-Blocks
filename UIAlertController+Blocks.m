@@ -7,7 +7,7 @@
 //  The MIT License (MIT)
 //
 //  Copyright (c) 2014 Ryan Maxwell
-//  "Only-Once" extension 2015 by Hagen Hübel
+//  "Only-Once" and throttleTime extension 2015 by Hagen Hübel
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -36,14 +36,15 @@ static NSInteger const UIAlertControllerBlocksFirstOtherButtonIndex = 2;
 @implementation UIAlertController (Blocks)
 
 static bool isAlreadyVisible = false;
+static NSDate* lastAlertClosed;
 
+#define __UIALERT_CLEAR_VISIBLE_FLAG @synchronized([self class]) { isAlreadyVisible = false; lastAlertClosed = [NSDate date]; }
 
-#define __UIALERT_CLEAR_VISIBLE_FLAG @synchronized([self class]) { isAlreadyVisible = false; }
-
-+ (instancetype)showInViewController:(UIViewController *)viewController
++ (nullable instancetype)showInViewController:(UIViewController *)viewController
                            withTitle:(NSString *)title
                              message:(NSString *)message
                             onlyOnce:(bool) onlyOnce
+                        throttleTime:(NSTimeInterval) throttle
                       preferredStyle:(UIAlertControllerStyle)preferredStyle
                    cancelButtonTitle:(NSString *)cancelButtonTitle
               destructiveButtonTitle:(NSString *)destructiveButtonTitle
@@ -53,13 +54,29 @@ static bool isAlreadyVisible = false;
 {
     
     @synchronized([self class]) {
-        if(onlyOnce && isAlreadyVisible) {
+        if(onlyOnce) {
+
+            bool dontAlert = false;
             
-            dispatch_async(dispatch_get_main_queue(), ^{
+            if(isAlreadyVisible) {
+                dontAlert = true;
+            }
+            else {
+                if(lastAlertClosed != nil) {
+                    NSDate* now = [NSDate date];
+                    NSTimeInterval interval = [now timeIntervalSinceDate:lastAlertClosed];
+                    if(interval < throttle) {
+                        dontAlert = true;
+                        lastAlertClosed = [NSDate date];
+                    }
+                }
+            }
+            
+            if(dontAlert) {
                 NSLog(@"UIAlertController already visible. Will avoid to create another instance.");
-            });
+                return nil;
+            }
             
-            return nil;
         }
     }
     
@@ -119,7 +136,54 @@ static bool isAlreadyVisible = false;
     return controller;
 }
 
-+ (instancetype)showAlertInViewController:(UIViewController *)viewController
++ (nullable instancetype)showInViewController:(UIViewController *)viewController
+                           withTitle:(NSString *)title
+                             message:(NSString *)message
+                            onlyOnce:(bool) onlyOnce
+                      preferredStyle:(UIAlertControllerStyle)preferredStyle
+                   cancelButtonTitle:(NSString *)cancelButtonTitle
+              destructiveButtonTitle:(NSString *)destructiveButtonTitle
+                   otherButtonTitles:(NSArray *)otherButtonTitles
+  popoverPresentationControllerBlock:(void(^)(UIPopoverPresentationController *popover))popoverPresentationControllerBlock
+                            tapBlock:(UIAlertControllerCompletionBlock)tapBlock
+{
+    return [self showInViewController:viewController
+                            withTitle:title
+                              message:message
+                             onlyOnce: onlyOnce
+                         throttleTime: 0
+                       preferredStyle:UIAlertControllerStyleAlert
+                    cancelButtonTitle:cancelButtonTitle
+               destructiveButtonTitle:destructiveButtonTitle
+                    otherButtonTitles:otherButtonTitles
+   popoverPresentationControllerBlock:nil
+                             tapBlock:tapBlock];
+}
+
++ (nullable instancetype)showAlertInViewController:(UIViewController *)viewController
+                                         withTitle:(NSString *)title
+                                           message:(NSString *)message
+                                          onlyOnce:(bool) onlyOnce
+                                      throttleTime:(NSTimeInterval) throttle
+                                 cancelButtonTitle:(NSString *)cancelButtonTitle
+                            destructiveButtonTitle:(NSString *)destructiveButtonTitle
+                                 otherButtonTitles:(NSArray *)otherButtonTitles
+                                          tapBlock:(UIAlertControllerCompletionBlock)tapBlock
+{
+    return [self showInViewController:viewController
+                            withTitle:title
+                              message:message
+                             onlyOnce: onlyOnce
+                         throttleTime: throttle
+                       preferredStyle:UIAlertControllerStyleAlert
+                    cancelButtonTitle:cancelButtonTitle
+               destructiveButtonTitle:destructiveButtonTitle
+                    otherButtonTitles:otherButtonTitles
+   popoverPresentationControllerBlock:nil
+                             tapBlock:tapBlock];
+}
+
++ (nullable instancetype)showAlertInViewController:(UIViewController *)viewController
                                 withTitle:(NSString *)title
                                   message:(NSString *)message
                                  onlyOnce:(bool) onlyOnce
@@ -140,7 +204,7 @@ static bool isAlreadyVisible = false;
                              tapBlock:tapBlock];
 }
 
-+ (instancetype)showActionSheetInViewController:(UIViewController *)viewController
++ (nullable instancetype)showActionSheetInViewController:(UIViewController *)viewController
                                       withTitle:(NSString *)title
                                         message:(NSString *)message
                                        onlyOnce:(bool) onlyOnce
@@ -160,7 +224,7 @@ static bool isAlreadyVisible = false;
                                         tapBlock:tapBlock];
 }
 
-+ (instancetype)showActionSheetInViewController:(UIViewController *)viewController
++ (nullable instancetype)showActionSheetInViewController:(UIViewController *)viewController
                                       withTitle:(NSString *)title
                                         message:(NSString *)message
                                        onlyOnce:(bool) onlyOnce

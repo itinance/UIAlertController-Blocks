@@ -1,7 +1,18 @@
 UIAlertController+Blocks
 ========================
 
-Convenience methods for UIAlertController. The API follows the same pattern as [UIAlertView+Blocks](https://github.com/ryanmaxwell/UIAlertView-Blocks) and [UIActionSheet+Blocks](https://github.com/ryanmaxwell/UIActionSheet-Blocks)
+Convenience methods for UIAlertController. The API follows the same pattern as 
+[UIAlertView+Blocks](https://github.com/ryanmaxwell/UIAlertView-Blocks) and [UIActionSheet+Blocks](https://github.com/ryanmaxwell/UIActionSheet-Blocks)
+
+### Changes in this fork:
+
+New arguments "onlyOnce" (bool) and "throttleTime" (NSTimeInterval) can be used to avoid 
+that multiple alert boxes occur at the same time or within a specific timespan.
+
+Imagine you have multiple background threads which sends notifications to the UI-Thread which
+will show those Alerts, maybe that all other threads got 403 error on API-requests.
+In most times it will be enough to display only ONE alert to the user in a specific time.
+
 
 Create and show an alert controller with a single call:
 
@@ -11,6 +22,8 @@ Create and show an alert controller with a single call:
 [UIAlertController showAlertInViewController:self
                                    withTitle:@"Test Alert"
                                      message:@"Test Message"
+                                    onlyOnce:YES
+                                throttleTime:10 
                            cancelButtonTitle:@"Cancel"
                       destructiveButtonTitle:@"Delete"
                            otherButtonTitles:@[@"First Other", @"Second Other"]
@@ -33,6 +46,8 @@ Create and show an alert controller with a single call:
 UIAlertController.showAlertInViewController(self,
     withTitle: "Test Alert",
     message: "Test Message",
+    onlyOnce: YES,
+    throttleTime: 10,
     cancelButtonTitle: "Cancel",
     destructiveButtonTitle: "Delete",
     otherButtonTitles: ["First Other", "Second Other"],

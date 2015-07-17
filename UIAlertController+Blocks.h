@@ -7,7 +7,7 @@
 //  The MIT License (MIT)
 //
 //  Copyright (c) 2014 Ryan Maxwell
-//  "Only-Once" extension 2015 by Hagen Hübel
+//  "Only-Once" and throttleTime extension 2015 by Hagen Hübel
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -34,7 +34,20 @@ typedef void (^UIAlertControllerCompletionBlock) (UIAlertController * __nonnull 
 
 @interface UIAlertController (Blocks)
 
-+ (nonnull instancetype)showInViewController:(nonnull UIViewController *)viewController
+
++ (nullable instancetype)showInViewController:(nonnull UIViewController *)viewController
+                                   withTitle:(nullable NSString *)title
+                                     message:(nullable NSString *)message
+                                    onlyOnce:(bool) onlyOnce
+                                throttleTime:(NSTimeInterval) throttle
+                              preferredStyle:(UIAlertControllerStyle)preferredStyle
+                           cancelButtonTitle:(nullable NSString *)cancelButtonTitle
+                      destructiveButtonTitle:(nullable NSString *)destructiveButtonTitle
+                           otherButtonTitles:(nullable NSArray *)otherButtonTitles
+          popoverPresentationControllerBlock:(nullable UIAlertControllerPopoverPresentationControllerBlock)popoverPresentationControllerBlock
+                                    tapBlock:(nullable UIAlertControllerCompletionBlock)tapBlock;
+
++ (nullable instancetype)showInViewController:(nonnull UIViewController *)viewController
                                    withTitle:(nullable NSString *)title
                                      message:(nullable NSString *)message
                                     onlyOnce:(bool) onlyOnce
@@ -45,7 +58,17 @@ typedef void (^UIAlertControllerCompletionBlock) (UIAlertController * __nonnull 
           popoverPresentationControllerBlock:(nullable UIAlertControllerPopoverPresentationControllerBlock)popoverPresentationControllerBlock
                                     tapBlock:(nullable UIAlertControllerCompletionBlock)tapBlock;
 
-+ (nonnull instancetype)showAlertInViewController:(nonnull UIViewController *)viewController
++ (nullable instancetype)showAlertInViewController:(nonnull UIViewController *)viewController
+                                         withTitle:(nullable NSString *)title
+                                           message:(nullable NSString *)message
+                                          onlyOnce:(bool) onlyOnce
+                                      throttleTime:(NSTimeInterval) throttle
+                                 cancelButtonTitle:(nullable NSString *)cancelButtonTitle
+                            destructiveButtonTitle:(nullable NSString *)destructiveButtonTitle
+                                 otherButtonTitles:(nullable NSArray *)otherButtonTitles
+                                          tapBlock:(nullable UIAlertControllerCompletionBlock)tapBlock;
+
++ (nullable instancetype)showAlertInViewController:(nonnull UIViewController *)viewController
                                         withTitle:(nullable NSString *)title
                                           message:(nullable NSString *)message
                                          onlyOnce:(bool) onlyOnce
@@ -54,7 +77,7 @@ typedef void (^UIAlertControllerCompletionBlock) (UIAlertController * __nonnull 
                                 otherButtonTitles:(nullable NSArray *)otherButtonTitles
                                          tapBlock:(nullable UIAlertControllerCompletionBlock)tapBlock;
 
-+ (nonnull instancetype)showActionSheetInViewController:(nonnull UIViewController *)viewController
++ (nullable instancetype)showActionSheetInViewController:(nonnull UIViewController *)viewController
                                               withTitle:(nullable NSString *)title
                                                 message:(nullable NSString *)message
                                                onlyOnce:(bool) onlyOnce
